@@ -61,6 +61,9 @@ interface IFeedback {
         const scoreButton = document.createElement("button");
         scoreButton.classList.add("btn-score", "active");
         scoreButton.textContent = feedback.score.toString();
+        scoreButton.addEventListener("click", () => {
+          this.highlightSelectedScore(feedback.score);
+        });
   
         feedbackContent.appendChild(feedbackContentHeader);
         feedbackContent.appendChild(feedbackContentBody);
@@ -71,29 +74,28 @@ interface IFeedback {
     }
   
     deleteFeedback(id: number): void {
-        const storedFeedbacks: Feedback[] = JSON.parse(
-          localStorage.getItem("feedbacks") || "[]"
-        );
-    
-        const updatedFeedbacks = storedFeedbacks.filter(
-          (feedback) => feedback.id !== id
-        );
-    
-        localStorage.setItem("feedbacks", JSON.stringify(updatedFeedbacks));
-    
-        const listFeedbackContainer = document.getElementById(
-          "list-feedback-content"
-        );
-    
-        if (listFeedbackContainer) {
-          // Xóa tất cả phần tử con của listFeedbackContainer
-          while (listFeedbackContainer.firstChild) {
-            listFeedbackContainer.firstChild.remove();
-          }
+      const storedFeedbacks: Feedback[] = JSON.parse(
+        localStorage.getItem("feedbacks") || "[]"
+      );
+  
+      const updatedFeedbacks = storedFeedbacks.filter(
+        (feedback) => feedback.id !== id
+      );
+  
+      localStorage.setItem("feedbacks", JSON.stringify(updatedFeedbacks));
+  
+      const listFeedbackContainer = document.getElementById(
+        "list-feedback-content"
+      );
+  
+      if (listFeedbackContainer) {
+        while (listFeedbackContainer.firstChild) {
+          listFeedbackContainer.firstChild.remove();
         }
-    
-        this.renderFeedbacks();
       }
+  
+      this.renderFeedbacks();
+    }
   
     highlightSelectedScore(score: number): void {
       const scoreButtons = document.querySelectorAll(".btn-score");
@@ -126,9 +128,14 @@ interface IFeedback {
   }
   
   function generateUniqueId(): number {
-    // Hàm để tạo ID duy nhất cho feedback
-    // Implement logic để tạo ID duy nhất ở đây
     return Math.floor(Math.random() * 1000);
+  }
+  function score(event:any) {
+    var button = event.target;
+    var score = button.getAttribute('data-score');
+    // console.log(score); // In điểm số ra console để kiểm tra
+  
+    // Thực hiện các xử lý khác dựa trên điểm số
   }
   
   function createFeedback(): void {
@@ -136,10 +143,13 @@ interface IFeedback {
     const feedbackContent = feedbackInput.value;
   
     if (feedbackContent.trim() !== "") {
+      const selectedScoreButton = document.querySelector(".btn-score.active") as HTMLButtonElement;
+      const score = parseInt(selectedScoreButton.getAttribute("data-score") || "0");
+  
       const feedback = new Feedback(
         generateUniqueId(),
         feedbackContent,
-        0
+        score
       );
   
       const feedbackCoach: FeedbackCoach = new FeedbackCoach();
@@ -157,10 +167,14 @@ interface IFeedback {
     const scoreButtons = document.querySelectorAll(".btn-score");
     scoreButtons.forEach((button) => {
       button.addEventListener("click", function () {
-        const selectedScore = parseInt(button.getAttribute("data-score") || "0");
-        feedbackCoach.highlightSelectedScore(selectedScore);
+        const score = parseInt(button.getAttribute("data-score") || "0");
+        feedbackCoach.highlightSelectedScore(score);
       });
     });
-  };
-
   
+    const feedbackForm = document.getElementById("feedbackForm");
+    feedbackForm?.addEventListener("submit", function (event) {
+      event.preventDefault();
+      createFeedback();
+    });
+  };
