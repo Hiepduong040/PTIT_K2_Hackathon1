@@ -37,6 +37,9 @@ class FeedbackCoach {
             const scoreButton = document.createElement("button");
             scoreButton.classList.add("btn-score", "active");
             scoreButton.textContent = feedback.score.toString();
+            scoreButton.addEventListener("click", () => {
+                this.highlightSelectedScore(feedback.score);
+            });
             feedbackContent.appendChild(feedbackContentHeader);
             feedbackContent.appendChild(feedbackContentBody);
             feedbackContent.appendChild(scoreButton);
@@ -49,7 +52,6 @@ class FeedbackCoach {
         localStorage.setItem("feedbacks", JSON.stringify(updatedFeedbacks));
         const listFeedbackContainer = document.getElementById("list-feedback-content");
         if (listFeedbackContainer) {
-            // Xóa tất cả phần tử con của listFeedbackContainer
             while (listFeedbackContainer.firstChild) {
                 listFeedbackContainer.firstChild.remove();
             }
@@ -84,15 +86,21 @@ class FeedbackCoach {
     }
 }
 function generateUniqueId() {
-    // Hàm để tạo ID duy nhất cho feedback
-    // Implement logic để tạo ID duy nhất ở đây
     return Math.floor(Math.random() * 1000);
+}
+function score(event) {
+    var button = event.target;
+    var score = button.getAttribute('data-score');
+    // console.log(score); // In điểm số ra console để kiểm tra
+    // Thực hiện các xử lý khác dựa trên điểm số
 }
 function createFeedback() {
     const feedbackInput = document.getElementById("feedbackInput");
     const feedbackContent = feedbackInput.value;
     if (feedbackContent.trim() !== "") {
-        const feedback = new Feedback(generateUniqueId(), feedbackContent, 0);
+        const selectedScoreButton = document.querySelector(".btn-score.active");
+        const score = parseInt(selectedScoreButton.getAttribute("data-score") || "0");
+        const feedback = new Feedback(generateUniqueId(), feedbackContent, score);
         const feedbackCoach = new FeedbackCoach();
         feedbackCoach.renderFeedback(feedback);
         feedbackCoach.saveFeedbackToLocal(feedback);
@@ -105,8 +113,13 @@ window.onload = function () {
     const scoreButtons = document.querySelectorAll(".btn-score");
     scoreButtons.forEach((button) => {
         button.addEventListener("click", function () {
-            const selectedScore = parseInt(button.getAttribute("data-score") || "0");
-            feedbackCoach.highlightSelectedScore(selectedScore);
+            const score = parseInt(button.getAttribute("data-score") || "0");
+            feedbackCoach.highlightSelectedScore(score);
         });
+    });
+    const feedbackForm = document.getElementById("feedbackForm");
+    feedbackForm === null || feedbackForm === void 0 ? void 0 : feedbackForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        createFeedback();
     });
 };
